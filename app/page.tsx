@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useEffect } from "react";
 import {
   ArrowUpRight,
   Check,
@@ -16,6 +17,7 @@ import TechnicalMode from "@/components/modes/TechnicalMode";
 import InteractiveMode from "@/components/modes/InteractiveMode";
 import TypewriterHeading from "@/components/TypewriterHeading";
 import HeroBackdrop from "@/components/HeroBackdrop";
+import PortfolioLoader from "@/components/PortfolioLoader";
 
 type Page = "executive" | "technical" | "interactive" | "contact";
 
@@ -325,6 +327,24 @@ function ExecutiveLanding({ onNavigate }: { onNavigate: (page: Page) => void }) 
 
 export default function Home() {
   const [page, setPage] = useState<Page>("executive");
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    let secondFrame = 0;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => setIsReady(true));
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      cancelAnimationFrame(secondFrame);
+    };
+  }, []);
+
+  if (!isReady) {
+    return <PortfolioLoader />;
+  }
+
   return (
     <main className="portfolio-shell">
       {page === "executive" && <ExecutiveLanding onNavigate={setPage} />}
