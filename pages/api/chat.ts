@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import Groq from 'groq-sdk';
 
-// Portfolio context that the AI will use to answer questions
 const PORTFOLIO_CONTEXT = `
 You are an AI assistant for a developer portfolio. Here's the information about the developer:
 
@@ -26,12 +25,12 @@ KEY PROJECTS:
    - 40% increase in conversion rate
    - $2.5M additional annual revenue
    - Tech: Next.js, AWS, PostgreSQL
-   
+
 2. Real-time Analytics Dashboard
    - Processing 1M+ events/day
    - Reduced infrastructure costs by $200K/year
    - Tech: React, Node.js, Redis, Kafka
-   
+
 3. AI-Powered Recommendation Engine
    - 25% boost in user engagement
    - 15% increase in premium subscriptions
@@ -41,28 +40,32 @@ Answer questions about this developer's skills, projects, and experience in a fr
 Keep responses concise (2-3 sentences) unless asked for details.
 `;
 
-export async function POST(request: NextRequest) {
-  try {
-    const { messages } = await request.json();
+export default async function handler(
+  request: NextApiRequest,
+  response: NextApiResponse<{ message: string }>
+) {
+  if (request.method !== 'POST') {
+    response.setHeader('Allow', ['POST']);
+    response.status(405).json({ message: 'Method not allowed' });
+    return;
+  }
 
-    // Check if Groq API key is set
+  try {
+    const { messages } = request.body;
+
     if (!process.env.GROQ_API_KEY) {
-      return NextResponse.json(
-        { 
-          message: "I'm currently in demo mode. Get your free API key at https://console.groq.com" 
-        },
-        { status: 200 }
-      );
+      response.status(200).json({
+        message: "I'm currently in demo mode. Get your free API key at https://console.groq.com",
+      });
+      return;
     }
 
-    // Initialize Groq client
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,
     });
 
-    // Call Groq API - Using latest Llama model (completely free!)
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.1-8b-instant', // Current fast model. Other options: 'llama-3.1-70b-versatile', 'mixtral-8x7b-32768'
+      model: 'llama-3.1-8b-instant',
       messages: [
         {
           role: 'system',
@@ -74,15 +77,15 @@ export async function POST(request: NextRequest) {
       max_tokens: 300,
     });
 
-    const aiMessage = completion.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response.";
+    const aiMessage =
+      completion.choices[0]?.message?.content ||
+      "I'm sorry, I couldn't generate a response.";
 
-    return NextResponse.json({ message: aiMessage });
-
+    response.status(200).json({ message: aiMessage });
   } catch (error) {
     console.error('Chat API Error:', error);
-    return NextResponse.json(
-      { message: "Sorry, I encountered an error. Please try again later." },
-      { status: 500 }
-    );
+    response.status(500).json({
+      message: 'Sorry, I encountered an error. Please try again later.',
+    });
   }
 }

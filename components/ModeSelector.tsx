@@ -47,7 +47,7 @@ export default function ModeSelector({ onModeSelect }: ModeSelectorProps) {
             Choose Your Experience
           </h1>
           <p className="text-xl text-gray-400">
-            Select how you'd like to explore this portfolio
+            Select how you&apos;d like to explore this portfolio
           </p>
         </motion.div>
 

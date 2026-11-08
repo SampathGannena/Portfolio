@@ -801,7 +801,7 @@ export default function ExecutiveMode({ onBack }: ExecutiveModeProps) {
             Ready to Discuss Your Project?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Let's talk about how I can help drive your technical initiatives
+            Let&apos;s talk about how I can help drive your technical initiatives
             forward and deliver measurable business results.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
